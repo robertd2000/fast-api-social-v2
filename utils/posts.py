@@ -17,7 +17,10 @@ def get_posts_from_db(offset: int = 0, limit: int = 10, db: Session = Depends(ge
 
 
 def get_post_from_db(post_id: int, db: Session = Depends(get_db)):
-    post = db.query(Post).filter(Post.id == post_id).first()
+    post = db.query(Post).filter(Post.id == post_id)
+    if not post.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Пост с id {post_id} не найден!')
+    post = post.first()
     likes = len(list(post.likes))
     dislikes = len(list(post.dislikes))
     post.likes_count = likes
@@ -48,7 +51,7 @@ def check_post_author(post_id: int, user_id: int, db: Session = Depends(get_db))
     return post.author_id == user_id
 
 
-def get_post_from_db(post_id: int, user_id: int, db: Session = Depends(get_db)):
+def get_post_from_db_and_check_author(post_id: int, user_id: int, db: Session = Depends(get_db)):
     post = db.query(Post).filter(Post.id == post_id)
     if not post.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Пост с id {post_id} не найден!')

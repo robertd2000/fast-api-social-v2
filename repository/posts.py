@@ -6,7 +6,7 @@ from schemas.post import PostCreate, Likes, Dislikes
 from models.post import Post, Like, Dislike
 from auth.oauth2 import get_current_user
 from utils.posts import get_posts_from_db, get_post_from_db, check_post_author, check_like_in_db, check_dislike_in_db, \
-    get_post_from_db
+    get_post_from_db_and_check_author
 
 
 def create_post_in_db(post: PostCreate, author: int = Depends(get_current_user), db: Session = Depends(get_db)) -> Post:
@@ -66,7 +66,7 @@ def dislike_post_db(dislike: Dislikes, author_id: int = Depends(get_current_user
 
 
 def delete_post_from_db(post_id: int, user_id: int = Depends(get_current_user), db: Session = Depends(get_db)):
-    post = get_post_from_db(post_id=post_id, user_id=user_id, db=db)
+    post = get_post_from_db_and_check_author(post_id=post_id, user_id=user_id, db=db)
     post.delete()
     db.commit()
     return {
@@ -76,7 +76,7 @@ def delete_post_from_db(post_id: int, user_id: int = Depends(get_current_user), 
 
 def update_post_in_db(post_id: int, request: PostCreate, user_id: int = Depends(get_current_user),
                       db: Session = Depends(get_db)):
-    post = get_post_from_db(post_id=post_id, user_id=user_id, db=db)
+    post = get_post_from_db_and_check_author(post_id=post_id, user_id=user_id, db=db)
     post.update(request.dict())
     db.commit()
     return post.first()
